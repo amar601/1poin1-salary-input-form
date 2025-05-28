@@ -153,6 +153,7 @@
   const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwc_NiOl6zwGkz_RIw5DumHU5MpPW9WChM_2p1hbZjBgwM0a9xKFnX1p1HyqEWg5qRxPA/exec";
 
   async function addEntry() {
+    alert("Submitting entry...");
     const loc = document.getElementById('location').value;
     const role = document.getElementById('role').value;
     const lang = document.getElementById('language').value;
@@ -162,6 +163,7 @@
     if (!user) return alert('Enter your name.');
 
     const entry = { location: loc, role, language: lang, salary, user };
+    console.log("Sending entry:", entry);
 
     const res = await fetch(SCRIPT_URL, {
       method: "POST",
