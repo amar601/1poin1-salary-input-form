@@ -5,8 +5,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Salary Input Form</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
+  
+  
   <style>
     body {
       font-family: 'Segoe UI', sans-serif;
@@ -149,56 +149,91 @@
     <tbody></tbody>
   </table>
 
-  <script>
-  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwc_NiOl6zwGkz_RIw5DumHU5MpPW9WChM_2p1hbZjBgwM0a9xKFnX1p1HyqEWg5qRxPA/exec";
+  
 
-  async function addEntry() {
-    alert("Submitting entry...");
-    const loc = document.getElementById('location').value;
-    const role = document.getElementById('role').value;
-    const lang = document.getElementById('language').value;
-    const salary = parseInt(document.getElementById('salary').value);
-    const user = document.getElementById('user').value.trim();
-    if (!salary || isNaN(salary)) return alert("Enter a valid salary.");
-    if (!user) return alert('Enter your name.');
+<script>
+const SHEET_URL = 'https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec';
 
-    const entry = { location: loc, role, language: lang, salary, user };
-    console.log("Sending entry:", entry);
+function toggleAdminLogin() {
+  const loginDiv = document.getElementById("adminLoginDiv");
+  loginDiv.style.display = loginDiv.style.display === "none" ? "block" : "none";
+}
 
-    const res = await fetch(SCRIPT_URL, {
-      method: "POST",
+function verifyAdmin() {
+  const input = document.getElementById("adminPassword").value;
+  const ADMIN_PASSWORD = "admin123";
+  if (input === ADMIN_PASSWORD) {
+    document.getElementById("adminMode").value = "true";
+    document.getElementById("adminStatus").innerText = "Admin Mode Enabled";
+    document.getElementById("adminLoginDiv").style.display = "none";
+  } else {
+    alert("Incorrect password");
+  }
+  renderTable();
+}
+
+async function addEntry() {
+  const loc = document.getElementById('location').value;
+  const role = document.getElementById('role').value;
+  const lang = document.getElementById('language').value;
+  const salary = parseInt(document.getElementById('salary').value);
+  const user = document.getElementById('user').value.trim();
+
+  if (!user) return alert("Please enter your name.");
+  if (!salary || isNaN(salary)) return alert("Enter a valid salary.");
+
+  const entry = { location: loc, role: role, language: lang, salary: salary, user: user };
+
+  try {
+    const response = await fetch(SHEET_URL, {
+      method: 'POST',
       body: JSON.stringify(entry),
-      headers: { "Content-Type": "application/json" }
+      headers: { 'Content-Type': 'application/json' }
     });
-
-    alert("Entry submitted!");
-    document.getElementById('salary').value = '';
-    renderTable(); // Reload data
+    const text = await response.text();
+    alert("Entry added: " + text);
+    renderTable();
+  } catch (err) {
+    alert("Failed to add entry: " + err);
   }
 
-  async function getFromSheet() {
-    const res = await fetch(SCRIPT_URL);
-    return await res.json();
-  }
+  document.getElementById('salary').value = '';
+}
 
-  async function renderTable() {
-    const tableBody = document.getElementById('salaryTable').getElementsByTagName('tbody')[0];
-    tableBody.innerHTML = '';
-    const entries = await getFromSheet();
-    const locationFilter = document.getElementById("locationFilter").value;
+async function getFromGoogleSheet() {
+  const response = await fetch(SHEET_URL);
+  const data = await response.json();
+  return data.map(row => ({
+    location: row[0],
+    role: row[1],
+    language: row[2],
+    salary: row[3],
+    user: row[4]
+  }));
+}
 
-    entries.slice(1).forEach(entry => {
-      if (locationFilter !== "ALL" && entry[0] !== locationFilter) return;
-      const row = tableBody.insertRow();
-      row.insertCell(0).innerText = entry[0];
-      row.insertCell(1).innerText = entry[1];
-      row.insertCell(2).innerText = entry[2];
-      row.insertCell(3).innerText = entry[3];
-      row.insertCell(4).innerText = entry[4];
-    });
-  }
+async function renderTable() {
+  const tableBody = document.getElementById('salaryTable').getElementsByTagName('tbody')[0];
+  tableBody.innerHTML = '';
+  const admin = document.getElementById("adminMode").value === "true";
+  const locationFilter = document.getElementById("locationFilter").value;
 
-  window.onload = renderTable;
+  const entries = await getFromGoogleSheet();
+
+  entries.forEach((entry, index) => {
+    if (locationFilter !== "ALL" && entry.location !== locationFilter) return;
+
+    const row = tableBody.insertRow();
+    row.insertCell(0).innerText = entry.location;
+    row.insertCell(1).innerText = entry.role;
+    row.insertCell(2).innerText = entry.language;
+    row.insertCell(3).innerText = entry.salary;
+    row.insertCell(4).innerText = entry.user;
+  });
+}
+
+window.onload = () => renderTable();
 </script>
+
 </body>
 </html>
