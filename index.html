@@ -5,225 +5,52 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Salary Input Form</title>
-  <style>
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      padding: 30px;
-      background: #f8f9fa;
-      color: #333;
-    }
-    h1, h2 {
-      color: #003366;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 20px;
-      background-color: #fff;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    }
-    th {
-      background-color: #003366;
-      color: white;
-      font-weight: bold;
-    }
-    td, th {
-      padding: 10px;
-      border: 1px solid #ccc;
-      text-align: center;
-    }
-    select, input[type="text"], input[type="number"], input[type="password"] {
-      padding: 8px;
-      margin: 5px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-    }
-    .btn {
-      margin-top: 10px;
-      padding: 10px 20px;
-      background-color: #0056b3;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-    .btn:hover {
-      background-color: #003d80;
-    }
-  </style>
 </head>
-
 <body>
-  <div style="display: flex; align-items: center; justify-content: space-between;">
-    <img src="https://www.1point1.in/images/logo.png" alt="1Point1 Logo" style="height: 60px;">
-    <h1 style="margin-right: auto; padding-left: 20px;">Salary Input Portal</h1>
-  </div>
-  <hr/>
-
-  <h2>Salary Input Form by Location, Role & Language</h2>
+  <h2>Salary Input Form</h2>
   <label for="user">Entered By:</label>
-  <input type="text" id="user" placeholder="Your Name"/>
-  <br/><br/>
-  
-  <button onclick="toggleAdminLogin()" class="btn">Admin Login</button>
-  <div id="adminLoginDiv" style="display:none; margin-top:10px;">
-    <input type="password" id="adminPassword" placeholder="Enter Admin Password"/>
-    <button onclick="verifyAdmin()">Submit</button>
-  </div>
-  <input type="hidden" id="adminMode"/>
-  <span id="adminStatus" style="margin-left:10px; font-weight:bold;"></span>
+  <input type="text" id="user" placeholder="Your Name"/><br><br>
 
   <label for="location">Location:</label>
   <select id="location">
     <option>MUMBAI</option><option>PUNE</option><option>BENGALURU</option>
     <option>CHENNAI</option><option>GURGAON</option><option>INDORE</option>
-  </select>
+  </select><br><br>
 
   <label for="role">Role:</label>
-  <select id="role">
-    <option>AVP Operations</option>
-    <option>Agent - Inbound Voice - Experience upto 2 Years - Graduate</option>
-    <option>Agent - Inbound Voice - Experience upto 2 Years - Undergraduate</option>
-    <option>Agent - Inbound Voice - Fresher - Graduate</option>
-    <option>Agent - Inbound Voice - Fresher - Undergraduate</option>
-    <option>Agent - Non-Voice - Experience upto 2 Years - Graduate</option>
-    <option>Agent - Non-Voice - Experience upto 2 Years - Undergraduate</option>
-    <option>Agent - Non-Voice - Fresher - Graduate</option>
-    <option>Agent - Non-Voice - Fresher - Undergraduate</option>
-    <option>Assiatant Manager</option>
-    <option>Operations Manager</option>
-    <option>QA</option>
-    <option>Quality Manager</option>
-    <option>Quality Team Lead</option>
-    <option>Senior Manager</option>
-    <option>Team Leader</option>
-    <option>Trainer</option>
-    <option>Training Lead</option>
-    <option>Training Manager</option>
-    <option>WFM / MIS</option>
-    <option>WFM Manager</option>
-  </select>
+  <input type="text" id="role" placeholder="Role" /><br><br>
 
   <label for="language">Language:</label>
-  <select id="language">
-    <option>Hindi</option><option>English</option><option>Marathi</option><option>Gujarati</option>
-    <option>Tamil</option><option>Telugu</option><option>Malyalam</option><option>Kannada</option>
-    <option>Konkani</option><option>Mizo</option><option>Khasi</option><option>Garo</option>
-    <option>Jayanti</option><option>Nagamese</option><option>Manipuri</option>
-    <option>Dogri</option><option>Kashmiri</option><option>Ladakhi</option>
-  </select>
+  <input type="text" id="language" placeholder="Language" /><br><br>
 
   <label for="salary">Salary:</label>
-  <input type="number" id="salary" placeholder="Enter salary"/>
+  <input type="number" id="salary" placeholder="Salary" /><br><br>
 
-  <button class="btn" onclick="addEntry()">Add Entry</button>
-  <button class="btn" onclick="downloadPDF()">Download PDF</button>
-  <button class="btn" onclick="downloadCSV()">Download CSV</button>
+  <button onclick="addEntry()">Add Entry</button>
 
-  <label for="locationFilter">Filter by Location:</label>
-  <select id="locationFilter" onchange="renderTable()">
-    <option value="ALL">All</option>
-    <option>MUMBAI</option><option>PUNE</option><option>BENGALURU</option>
-    <option>CHENNAI</option><option>GURGAON</option><option>INDORE</option>
-  </select>
+  <script>
+    const SHEET_URL = 'https://script.google.com/macros/s/AKfycbyUTka0B6u7e8tKgd6L8F071qFmikxdHdZn-o98Z-q1_FxJNvzAtYN-5GXaVq8Fz_s0cg/exec'; 
 
-  <table id="salaryTable">
-    <thead>
-      <tr>
-        <th>Location</th><th>Role</th><th>Language</th><th>Salary</th><th>Entered By</th><th class='admin-col' style='display:none;'>Action</th><th class='admin-col' style='display:none;'>Action</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
+    async function addEntry() {
+      const formData = new FormData();
+      formData.append('location', document.getElementById('location').value);
+      formData.append('role', document.getElementById('role').value);
+      formData.append('language', document.getElementById('language').value);
+      formData.append('salary', document.getElementById('salary').value);
+      formData.append('user', document.getElementById('user').value);
 
-<script>
-const SHEET_URL = 'https://script.google.com/macros/s/AKfycbyUTka0B6u7e8tKgd6L8F071qFmikxdHdZn-o98Z-q1_FxJNvzAtYN-5GXaVq8Fz_s0cg/exec';
+      try {
+        const response = await fetch(SHEET_URL, {
+          method: 'POST',
+          body: formData
+        });
 
-function toggleAdminLogin() {
-  const loginDiv = document.getElementById("adminLoginDiv");
-  loginDiv.style.display = loginDiv.style.display === "none" ? "block" : "none";
-}
-
-function verifyAdmin() {
-  const input = document.getElementById("adminPassword").value;
-  const ADMIN_PASSWORD = "admin123";
-  if (input === ADMIN_PASSWORD) {
-    document.getElementById("adminMode").value = "true";
-    document.getElementById("adminStatus").innerText = "Admin Mode Enabled";
-    document.getElementById("adminLoginDiv").style.display = "none";
-  } else {
-    alert("Incorrect password");
-  }
-  renderTable();
-}
-
-async function addEntry() {
-  const loc = document.getElementById('location').value;
-  const role = document.getElementById('role').value;
-  const lang = document.getElementById('language').value;
-  const salary = document.getElementById('salary').value;
-  const user = document.getElementById('user').value.trim();
-
-  if (!user) return alert("Please enter your name.");
-  if (!salary || isNaN(salary)) return alert("Enter a valid salary.");
-
-  const formData = new FormData();
-  formData.append('location', loc);
-  formData.append('role', role);
-  formData.append('language', lang);
-  formData.append('salary', salary);
-  formData.append('user', user);
-
-  try {
-    const response = await fetch(SHEET_URL, {
-      method: 'POST',
-      body: formData
-    });
-    const text = await response.text();
-    alert("Entry added: " + text);
-    renderTable();
-  } catch (err) {
-    alert("Failed to add entry: " + err.message);
-    console.error(err);
-  }
-
-  document.getElementById('salary').value = '';
-}
-
-async function getFromGoogleSheet() {
-  const response = await fetch(SHEET_URL);
-  const data = await response.json();
-  return data.map(row => ({
-    location: row[0],
-    role: row[1],
-    language: row[2],
-    salary: row[3],
-    user: row[4]
-  }));
-}
-
-async function renderTable() {
-  const tableBody = document.getElementById('salaryTable').getElementsByTagName('tbody')[0];
-  tableBody.innerHTML = '';
-  const admin = document.getElementById("adminMode").value === "true";
-  const locationFilter = document.getElementById("locationFilter").value;
-
-  const entries = await getFromGoogleSheet();
-
-  entries.forEach((entry, index) => {
-    if (locationFilter !== "ALL" && entry.location !== locationFilter) return;
-
-    const row = tableBody.insertRow();
-    row.insertCell(0).innerText = entry.location;
-    row.insertCell(1).innerText = entry.role;
-    row.insertCell(2).innerText = entry.language;
-    row.insertCell(3).innerText = entry.salary;
-    row.insertCell(4).innerText = entry.user;
-  });
-}
-
-window.onload = () => renderTable();
-</script>
-
+        const result = await response.text();
+        alert("Entry added: " + result);
+      } catch (err) {
+        alert("Failed to add entry: " + err.message);
+      }
+    }
+  </script>
 </body>
 </html>
