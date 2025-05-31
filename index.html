@@ -5,8 +5,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Salary Input Form</title>
-  
-  
   <style>
     body {
       font-family: 'Segoe UI', sans-serif;
@@ -52,13 +50,6 @@
     .btn:hover {
       background-color: #003d80;
     }
-
-    body { font-family: Arial, sans-serif; padding: 20px; }
-    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-    th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
-    th { background-color: #f2f2f2; }
-    select, input { padding: 5px; margin: 5px; }
-    .btn { margin-top: 10px; padding: 10px 20px; cursor: pointer; }
   </style>
 </head>
 
@@ -80,9 +71,7 @@
     <button onclick="verifyAdmin()">Submit</button>
   </div>
   <input type="hidden" id="adminMode"/>
-
   <span id="adminStatus" style="margin-left:10px; font-weight:bold;"></span>
-
 
   <label for="location">Location:</label>
   <select id="location">
@@ -131,7 +120,6 @@
   <button class="btn" onclick="downloadPDF()">Download PDF</button>
   <button class="btn" onclick="downloadCSV()">Download CSV</button>
 
-  
   <label for="locationFilter">Filter by Location:</label>
   <select id="locationFilter" onchange="renderTable()">
     <option value="ALL">All</option>
@@ -140,7 +128,6 @@
   </select>
 
   <table id="salaryTable">
-
     <thead>
       <tr>
         <th>Location</th><th>Role</th><th>Language</th><th>Salary</th><th>Entered By</th><th class='admin-col' style='display:none;'>Action</th><th class='admin-col' style='display:none;'>Action</th>
@@ -148,8 +135,6 @@
     </thead>
     <tbody></tbody>
   </table>
-
-  
 
 <script>
 const SHEET_URL = 'https://script.google.com/macros/s/AKfycbyUTka0B6u7e8tKgd6L8F071qFmikxdHdZn-o98Z-q1_FxJNvzAtYN-5GXaVq8Fz_s0cg/exec';
