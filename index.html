@@ -60,7 +60,7 @@
   </div>
   <input type="hidden" id="adminMode"/>
   <span id="adminStatus"></span><br/><br/>
-  
+
   <label for="location">Location:</label>
   <select id="location">
     <option>MUMBAI</option><option>PUNE</option><option>BENGALURU</option><option>CHENNAI</option><option>GURGAON</option><option>INDORE</option>
@@ -145,14 +145,21 @@
     const user = document.getElementById('user').value.trim();
     const salary = parseInt(document.getElementById('salary').value, 10);
     if (!user || !salary) return alert("Fill all fields properly.");
-    const data = new URLSearchParams({
+
+    const payload = {
       location: document.getElementById('location').value,
       role: document.getElementById('role').value,
       language: document.getElementById('language').value,
       salary: salary,
       user: user
+    };
+
+    const res = await fetch(SHEET_URL, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+      headers: { 'Content-Type': 'application/json' }
     });
-    const res = await fetch(SHEET_URL, { method: 'POST', body: data });
+
     alert(await res.text());
     renderTable();
   }
@@ -213,6 +220,5 @@
 
   window.onload = () => renderTable();
 </script>
-
 </body>
 </html>
