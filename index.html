@@ -4,7 +4,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Salary Input Form</title>
+  <title>Salary Input Portal</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
   <style>
     body {
       font-family: 'Segoe UI', sans-serif;
@@ -12,31 +14,20 @@
       background: #f8f9fa;
       color: #333;
     }
-    h1, h2 {
-      color: #003366;
-    }
     table {
       width: 100%;
       border-collapse: collapse;
       margin-top: 20px;
       background-color: #fff;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 8px;
+      text-align: center;
     }
     th {
       background-color: #003366;
       color: white;
-      font-weight: bold;
-    }
-    td, th {
-      padding: 10px;
-      border: 1px solid #ccc;
-      text-align: center;
-    }
-    select, input[type="text"], input[type="number"], input[type="password"] {
-      padding: 8px;
-      margin: 5px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
     }
     .btn {
       margin-top: 10px;
@@ -52,7 +43,6 @@
     }
   </style>
 </head>
-
 <body>
   <div style="display: flex; align-items: center; justify-content: space-between;">
     <img src="https://www.1point1.in/images/logo.png" alt="1Point1 Logo" style="height: 60px;">
@@ -60,27 +50,24 @@
   </div>
   <hr/>
 
-  <h2>Salary Input Form by Location, Role & Language</h2>
+  <h2>Salary Input Form</h2>
   <label for="user">Entered By:</label>
-  <input type="text" id="user" placeholder="Your Name" required />
-  <br/><br/>
-  
+  <input type="text" id="user" required />
   <button onclick="toggleAdminLogin()" class="btn">Admin Login</button>
-  <div id="adminLoginDiv" style="display:none; margin-top:10px;">
+  <div id="adminLoginDiv" style="display:none;">
     <input type="password" id="adminPassword" placeholder="Enter Admin Password"/>
     <button onclick="verifyAdmin()">Submit</button>
   </div>
   <input type="hidden" id="adminMode"/>
-  <span id="adminStatus" style="margin-left:10px; font-weight:bold;"></span>
-
+  <span id="adminStatus"></span><br/><br/>
+  
   <label for="location">Location:</label>
-  <select id="location" required>
-    <option>MUMBAI</option><option>PUNE</option><option>BENGALURU</option>
-    <option>CHENNAI</option><option>GURGAON</option><option>INDORE</option>
+  <select id="location">
+    <option>MUMBAI</option><option>PUNE</option><option>BENGALURU</option><option>CHENNAI</option><option>GURGAON</option><option>INDORE</option>
   </select>
 
   <label for="role">Role:</label>
-  <select id="role" required>
+  <select id="role">
     <option>AVP Operations</option>
     <option>Agent - Inbound Voice - Experience upto 2 Years - Graduate</option>
     <option>Agent - Inbound Voice - Experience upto 2 Years - Undergraduate</option>
@@ -105,7 +92,7 @@
   </select>
 
   <label for="language">Language:</label>
-  <select id="language" required>
+  <select id="language">
     <option>Hindi</option><option>English</option><option>Marathi</option><option>Gujarati</option>
     <option>Tamil</option><option>Telugu</option><option>Malayalam</option><option>Kannada</option>
     <option>Konkani</option><option>Mizo</option><option>Khasi</option><option>Garo</option>
@@ -114,112 +101,117 @@
   </select>
 
   <label for="salary">Salary:</label>
-  <input type="number" id="salary" placeholder="Enter salary" required />
-
+  <input type="number" id="salary" required />
   <button class="btn" onclick="addEntry()">Add Entry</button>
   <button class="btn" onclick="renderTable()">Refresh Table</button>
+  <br/><br/>
 
   <label for="locationFilter">Filter by Location:</label>
   <select id="locationFilter" onchange="renderTable()">
     <option value="ALL">All</option>
-    <option>MUMBAI</option><option>PUNE</option><option>BENGALURU</option>
-    <option>CHENNAI</option><option>GURGAON</option><option>INDORE</option>
+    <option>MUMBAI</option><option>PUNE</option><option>BENGALURU</option><option>CHENNAI</option><option>GURGAON</option><option>INDORE</option>
   </select>
+  <label><input type="checkbox" id="myEntriesOnly" onchange="renderTable()"> Show only my entries</label>
+  <br/><br/>
+  <button class="btn" onclick="exportCSV()">Export to CSV</button>
+  <button class="btn" onclick="downloadPDF()">Download PDF</button>
 
   <table id="salaryTable">
     <thead>
-      <tr>
-        <th>Location</th><th>Role</th><th>Language</th><th>Salary</th><th>Entered By</th>
-      </tr>
+      <tr><th>Location</th><th>Role</th><th>Language</th><th>Salary</th><th>User</th><th>Action</th></tr>
     </thead>
     <tbody></tbody>
   </table>
 
 <script>
-const SHEET_URL = 'https://script.google.com/macros/s/AKfycbyUTka0B6u7e8tKgd6L8F071qFmikxdHdZn-o98Z-q1_FxJNvzAtYN-5GXaVq8Fz_s0cg/exec';
+  const SHEET_URL = 'https://script.google.com/macros/s/YOUR_DEPLOYED_SCRIPT_URL/exec';
 
-function toggleAdminLogin() {
-  const loginDiv = document.getElementById("adminLoginDiv");
-  loginDiv.style.display = loginDiv.style.display === "none" ? "block" : "none";
-}
-
-function verifyAdmin() {
-  const input = document.getElementById("adminPassword").value;
-  const ADMIN_PASSWORD = "admin123";
-  if (input === ADMIN_PASSWORD) {
-    document.getElementById("adminMode").value = "true";
-    document.getElementById("adminStatus").innerText = "Admin Mode Enabled";
-    document.getElementById("adminLoginDiv").style.display = "none";
-  } else {
-    alert("Incorrect password");
+  function toggleAdminLogin() {
+    const div = document.getElementById("adminLoginDiv");
+    div.style.display = div.style.display === "none" ? "block" : "none";
   }
-  renderTable();
-}
 
-async function addEntry() {
-  const loc = document.getElementById('location').value;
-  const role = document.getElementById('role').value;
-  const lang = document.getElementById('language').value;
-  const salary = parseInt(document.getElementById('salary').value, 10);
-  const user = document.getElementById('user').value.trim();
+  function verifyAdmin() {
+    const pwd = document.getElementById("adminPassword").value;
+    if (pwd === "admin123") {
+      document.getElementById("adminMode").value = "true";
+      document.getElementById("adminStatus").innerText = "Admin Mode Enabled";
+      document.getElementById("adminLoginDiv").style.display = "none";
+      renderTable();
+    } else alert("Incorrect Password");
+  }
 
-  if (!user) return alert("Please enter your name.");
-  if (!salary || isNaN(salary)) return alert("Enter a valid salary.");
-  if (!loc || !role || !lang) return alert("Please fill all dropdown fields.");
-
-  const formData = new URLSearchParams();
-  formData.append("location", loc);
-  formData.append("role", role);
-  formData.append("language", lang);
-  formData.append("salary", salary);
-  formData.append("user", user);
-
-  try {
-    const response = await fetch(SHEET_URL, {
-      method: 'POST',
-      body: formData
+  async function addEntry() {
+    const user = document.getElementById('user').value.trim();
+    const salary = parseInt(document.getElementById('salary').value, 10);
+    if (!user || !salary) return alert("Fill all fields properly.");
+    const data = new URLSearchParams({
+      location: document.getElementById('location').value,
+      role: document.getElementById('role').value,
+      language: document.getElementById('language').value,
+      salary: salary,
+      user: user
     });
-    const text = await response.text();
-    alert("Entry added: " + text);
-    document.getElementById('salary').value = '';
+    const res = await fetch(SHEET_URL, { method: 'POST', body: data });
+    alert(await res.text());
     renderTable();
-  } catch (err) {
-    alert("Failed to add entry: " + err.message);
   }
-}
 
-async function getFromGoogleSheet() {
-  const response = await fetch(SHEET_URL);
-  const data = await response.json();
-  return data.map(row => ({
-    location: row[0],
-    role: row[1],
-    language: row[2],
-    salary: row[3],
-    user: row[4]
-  }));
-}
+  async function getFromSheet() {
+    const res = await fetch(SHEET_URL);
+    const data = await res.json();
+    return data.map((r, i) => ({
+      location: r[0], role: r[1], language: r[2], salary: r[3], user: r[4], index: i
+    }));
+  }
 
-async function renderTable() {
-  const tableBody = document.getElementById('salaryTable').getElementsByTagName('tbody')[0];
-  if (!tableBody) return;
-  tableBody.innerHTML = '';
-  const locationFilter = document.getElementById("locationFilter").value;
+  async function renderTable() {
+    const tbody = document.querySelector("#salaryTable tbody");
+    tbody.innerHTML = "";
+    const entries = await getFromSheet();
+    const filter = document.getElementById("locationFilter").value;
+    const myOnly = document.getElementById("myEntriesOnly").checked;
+    const me = document.getElementById("user").value.trim();
+    const isAdmin = document.getElementById("adminMode").value === "true";
 
-  const entries = await getFromGoogleSheet();
+    entries.forEach(e => {
+      if ((filter !== "ALL" && e.location !== filter) || (myOnly && e.user !== me)) return;
+      const row = tbody.insertRow();
+      row.innerHTML = `<td>${e.location}</td><td>${e.role}</td><td>${e.language}</td><td>${e.salary}</td><td>${e.user}</td>`;
+      const delCell = row.insertCell();
+      if (isAdmin) {
+        const btn = document.createElement("button");
+        btn.innerText = "Delete";
+        btn.onclick = () => alert("Delete action placeholder for index: " + e.index);
+        delCell.appendChild(btn);
+      } else delCell.innerText = "-";
+    });
+  }
 
-  entries.forEach((entry) => {
-    if (locationFilter !== "ALL" && entry.location !== locationFilter) return;
-    const row = tableBody.insertRow();
-    row.insertCell(0).innerText = entry.location;
-    row.insertCell(1).innerText = entry.role;
-    row.insertCell(2).innerText = entry.language;
-    row.insertCell(3).innerText = entry.salary;
-    row.insertCell(4).innerText = entry.user;
-  });
-}
+  function exportCSV() {
+    let csv = "Location,Role,Language,Salary,User\\n";
+    document.querySelectorAll("#salaryTable tbody tr").forEach(row => {
+      let cells = [...row.querySelectorAll("td")].slice(0, 5);
+      csv += cells.map(c => c.innerText).join(",") + "\\n";
+    });
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = "salary_data.csv"; a.click();
+    URL.revokeObjectURL(url);
+  }
 
-window.onload = () => renderTable();
+  function downloadPDF() {
+    html2canvas(document.querySelector("#salaryTable")).then(canvas => {
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF();
+      const img = canvas.toDataURL("image/png");
+      pdf.addImage(img, "PNG", 10, 10, 190, 0);
+      pdf.save("salary_data.pdf");
+    });
+  }
+
+  window.onload = () => renderTable();
 </script>
 
 </body>
