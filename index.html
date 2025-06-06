@@ -167,16 +167,6 @@
     }
   }
 
-    const res = await fetch(SHEET_URL, {
-      method: 'POST',
-      body: JSON.stringify(payload),
-      headers: { 'Content-Type': 'application/json' }
-    });
-
-    alert(await res.text());
-    renderTable();
-  }
-
   async function getFromSheet() {
     const res = await fetch(SHEET_URL);
     const data = await res.json();
@@ -209,10 +199,10 @@
   }
 
   function exportCSV() {
-    let csv = "Location,Role,Language,Salary,User\\n";
+    let csv = "Location,Role,Language,Salary,User\n";
     document.querySelectorAll("#salaryTable tbody tr").forEach(row => {
       let cells = [...row.querySelectorAll("td")].slice(0, 5);
-      csv += cells.map(c => c.innerText).join(",") + "\\n";
+      csv += cells.map(c => c.innerText).join(",") + "\n";
     });
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
