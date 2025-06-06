@@ -146,13 +146,26 @@
     const salary = parseInt(document.getElementById('salary').value, 10);
     if (!user || !salary) return alert("Fill all fields properly.");
 
-    const payload = {
-      location: document.getElementById('location').value,
-      role: document.getElementById('role').value,
-      language: document.getElementById('language').value,
-      salary: salary,
-      user: user
-    };
+    const formData = new URLSearchParams();
+    formData.append("location", document.getElementById('location').value);
+    formData.append("role", document.getElementById('role').value);
+    formData.append("language", document.getElementById('language').value);
+    formData.append("salary", salary);
+    formData.append("user", user);
+
+    try {
+      const res = await fetch(SHEET_URL, {
+        method: 'POST',
+        body: formData
+      });
+
+      const text = await res.text();
+      alert(text);
+      renderTable();
+    } catch (err) {
+      alert("Error: " + err.message);
+    }
+  }
 
     const res = await fetch(SHEET_URL, {
       method: 'POST',
